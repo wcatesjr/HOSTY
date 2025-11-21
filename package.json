@@ -1,0 +1,98 @@
+{
+  "name": "hosty",
+  "version": "1.0.0",
+  "description": "Fast and seamless switching between multiple HOSTS file configurations",
+  "main": "dist/main/main/main.js",
+  "scripts": {
+    "build": "npm run build:main && npm run build:preload && npm run build:renderer && npm run copy:assets",
+    "build:main": "tsc -p tsconfig.main.json && npm run copy:shared",
+    "build:preload": "tsc -p tsconfig.preload.json",
+    "build:renderer": "webpack --mode production",
+    "copy:shared": "node -e \"const fs=require('fs');const path=require('path');const src=path.join(__dirname,'dist/main/shared');const dest=path.join(__dirname,'dist/shared');if(!fs.existsSync(dest))fs.mkdirSync(dest,{recursive:true});fs.readdirSync(src).forEach(f=>fs.copyFileSync(path.join(src,f),path.join(dest,f)));\"",
+    "copy:assets": "node -e \"const fs=require('fs');const path=require('path');const src=path.join(__dirname,'assets');const dest=path.join(__dirname,'dist/assets');if(fs.existsSync(src)){if(!fs.existsSync(dest))fs.mkdirSync(dest,{recursive:true});fs.readdirSync(src).forEach(f=>{const srcFile=path.join(src,f);const destFile=path.join(dest,f);if(fs.statSync(srcFile).isFile())fs.copyFileSync(srcFile,destFile);});}\"",
+    "dev": "concurrently \"npm run dev:main\" \"npm run dev:preload\" \"npm run dev:renderer\" \"wait-on dist/main/main.js && electron .\"",
+    "dev:main": "tsc -p tsconfig.main.json --watch",
+    "dev:preload": "tsc -p tsconfig.preload.json --watch",
+    "dev:renderer": "webpack serve --mode development",
+    "start": "electron .",
+    "package": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder",
+    "package:dir": "cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --dir",
+    "package:zip": "node scripts/create-zip-simple.js",
+    "postinstall": "electron-builder install-app-deps",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "audit:production": "npm audit --production",
+    "audit:report": "npm audit --json > audit-report.json && echo Audit report saved to audit-report.json"
+  },
+  "keywords": [
+    "hosts",
+    "file",
+    "manager",
+    "environment",
+    "switching"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "archiver": "^7.0.1",
+    "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
+    "css-loader": "^6.8.1",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "electron-packager": "^17.1.2",
+    "html-webpack-plugin": "^5.6.0",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "wait-on": "^7.2.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "node-html-parser": "^7.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "build": {
+    "appId": "com.hosty.app",
+    "productName": "HOSTY",
+    "win": {
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "sign": null,
+      "signDlls": false,
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "files": [
+      "dist/main/**/*",
+      "dist/renderer/**/*",
+      "dist/shared/**/*",
+      "dist/assets/**/*",
+      "package.json",
+      "README.txt",
+      "!dist/temp-build/**/*",
+      "!dist/win-unpacked/**/*",
+      "!dist/HOSTY-temp-*/**/*",
+      "!dist/*.zip",
+      "!dist/builder-*.yml",
+      "!dist/builder-*.yaml"
+    ],
+    "extraFiles": [
+      {
+        "from": "README.txt",
+        "to": "README.txt"
+      }
+    ]
+  }
+}
